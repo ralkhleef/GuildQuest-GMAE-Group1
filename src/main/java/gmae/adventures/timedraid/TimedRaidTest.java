@@ -26,7 +26,6 @@ public class TimedRaidTest {
             System.out.println("Progress: " + Arrays.toString(state.getProgressCopy()));
             System.out.println("Required: " + Arrays.toString(state.getRequiredCopy()));
 
-            // simple rotation so objectives actually complete
             TimedRaidState.Action action;
             if (step % 3 == 0) action = TimedRaidState.Action.WORK_ON_OBJECTIVE_1;
             else if (step % 3 == 1) action = TimedRaidState.Action.WORK_ON_OBJECTIVE_2;
