@@ -9,11 +9,6 @@ public class TimedRaidState {
     public enum Result { IN_PROGRESS, WIN, LOSE }
 
     public enum Action {
-        MOVE_UP,
-        MOVE_DOWN,
-        MOVE_LEFT,
-        MOVE_RIGHT,
-        WORK,
         WORK_ON_OBJECTIVE_1,
         WORK_ON_OBJECTIVE_2,
         WORK_ON_OBJECTIVE_3,
@@ -26,23 +21,12 @@ public class TimedRaidState {
     private int roundsRemaining;
 
     private PlayerId currentPlayer;
-    private int actionsThisRound;
+    private int actionsThisRound; // 0 or 1 (after 2 actions -> end round)
 
     private final int[] progress = new int[3];
     private final int[] required = new int[3];
 
     private Result result = Result.IN_PROGRESS;
-
-    private long elapsedMinutes = 0;
-
-    private int p1x = 0, p1y = 0;
-    private int p2x = 0, p2y = 0;
-
-    private final int width = 5;
-    private final int height = 5;
-
-    private final int[] objX = new int[]{1, 3, 4};
-    private final int[] objY = new int[]{1, 2, 4};
 
     public TimedRaidState(WorldClock clock, int maxRounds, int roundMinutes, int[] requiredObjectives) {
         if (clock == null) throw new IllegalArgumentException("clock cannot be null");
@@ -61,11 +45,14 @@ public class TimedRaidState {
 
         this.currentPlayer = PlayerId.P1;
         this.actionsThisRound = 0;
+<<<<<<< Updated upstream
+=======
 
         this.p1x = 0;
         this.p1y = 0;
-        this.p2x = 0;
-        this.p2y = height - 1;
+        this.p2x = 2;
+        this.p2y = 3;
+>>>>>>> Stashed changes
     }
 
     public PlayerId getCurrentPlayer() {
@@ -92,42 +79,6 @@ public class TimedRaidState {
         return result != Result.IN_PROGRESS;
     }
 
-    public WorldClock getClock() {
-        return clock;
-    }
-
-    public long getElapsedMinutes() {
-        return elapsedMinutes;
-    }
-
-    public int getObjectivesCompleted() {
-        int sum = 0;
-        for (int i = 0; i < 3; i++) sum += progress[i];
-        return sum;
-    }
-
-    public int getObjectivesRequired() {
-        int sum = 0;
-        for (int i = 0; i < 3; i++) sum += required[i];
-        return sum;
-    }
-
-    public int getPlayerX(PlayerId p) {
-        return (p == PlayerId.P1) ? p1x : p2x;
-    }
-
-    public int getPlayerY(PlayerId p) {
-        return (p == PlayerId.P1) ? p1y : p2y;
-    }
-
-    public boolean isPlayerOnObjective(PlayerId p) {
-        return objectiveAt(p) != -1;
-    }
-
-    public int getObjectiveIndexAtPlayer(PlayerId p) {
-        return objectiveAt(p);
-    }
-
     public void applyAction(PlayerId player, Action action) {
         if (isOver()) return;
 
@@ -135,65 +86,35 @@ public class TimedRaidState {
             throw new IllegalStateException("Not " + player + "'s turn. Current: " + currentPlayer);
         }
 
+        // 1) Apply action
         if (action != null) {
             switch (action) {
-                case MOVE_UP -> move(player, 0, -1);
-                case MOVE_DOWN -> move(player, 0, 1);
-                case MOVE_LEFT -> move(player, -1, 0);
-                case MOVE_RIGHT -> move(player, 1, 0);
-
-                case WORK -> {
-                    int idx = objectiveAt(player);
-                    if (idx != -1) incObjective(idx);
-                }
-
                 case WORK_ON_OBJECTIVE_1 -> incObjective(0);
                 case WORK_ON_OBJECTIVE_2 -> incObjective(1);
                 case WORK_ON_OBJECTIVE_3 -> incObjective(2);
-
-                case PASS -> { }
+                case PASS -> { /* do nothing */ }
             }
         }
 
+        // 2) Advance turn structure
         actionsThisRound++;
 
         if (actionsThisRound == 1) {
+            // P1 acted -> now P2
             currentPlayer = PlayerId.P2;
         } else if (actionsThisRound == 2) {
+            // End of round, consume time after BOTH players act
             actionsThisRound = 0;
             currentPlayer = PlayerId.P1;
 
             roundsRemaining = Math.max(0, roundsRemaining - 1);
             clock.advance(roundMinutes);
-            elapsedMinutes += roundMinutes;
         } else {
             throw new IllegalStateException("actionsThisRound invalid: " + actionsThisRound);
         }
 
+        // 3) Check win/lose
         updateResult();
-    }
-
-    private void move(PlayerId p, int dx, int dy) {
-        if (p == PlayerId.P1) {
-            p1x = clamp(p1x + dx, 0, width - 1);
-            p1y = clamp(p1y + dy, 0, height - 1);
-        } else {
-            p2x = clamp(p2x + dx, 0, width - 1);
-            p2y = clamp(p2y + dy, 0, height - 1);
-        }
-    }
-
-    private int clamp(int v, int lo, int hi) {
-        return Math.max(lo, Math.min(hi, v));
-    }
-
-    private int objectiveAt(PlayerId p) {
-        int x = getPlayerX(p);
-        int y = getPlayerY(p);
-        for (int i = 0; i < 3; i++) {
-            if (objX[i] == x && objY[i] == y) return i;
-        }
-        return -1;
     }
 
     private void incObjective(int idx) {
