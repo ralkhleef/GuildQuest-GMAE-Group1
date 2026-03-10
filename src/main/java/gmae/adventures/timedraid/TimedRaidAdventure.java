@@ -79,7 +79,7 @@ public class TimedRaidAdventure implements MiniAdventure {
 
         TimedRaidState.Action action = parseAction(input);
         if (action == null) {
-            lastActionMessage = "Invalid command. Use: u d l r w p";
+            lastActionMessage = "Invalid command. Use: up, down, left, right, complete, pass";
             return;
         }
 
@@ -132,7 +132,12 @@ public class TimedRaidAdventure implements MiniAdventure {
         status += "\n";
         status += "Player 1: (" + state.getPlayerX(TimedRaidState.PlayerId.P1) + "," + state.getPlayerY(TimedRaidState.PlayerId.P1) + ")";
         status += "   Player 2: (" + state.getPlayerX(TimedRaidState.PlayerId.P2) + "," + state.getPlayerY(TimedRaidState.PlayerId.P2) + ")\n";
-        status += "Current Player Tile: " + currentTileText(state.getCurrentPlayer()) + "\n";
+        if (mode == TimedRaidMode.REAL_TIME) {
+            status += "Player 1 Tile: " + currentTileText(TimedRaidState.PlayerId.P1) + "\n";
+            status += "Player 2 Tile: " + currentTileText(TimedRaidState.PlayerId.P2) + "\n";
+        } else {
+            status += "Current Player Tile: " + currentTileText(state.getCurrentPlayer()) + "\n";
+        }
         status += "Last Action: " + lastActionMessage + "\n";
         status += "\n";
         status += "Objectives:\n";
@@ -143,9 +148,9 @@ public class TimedRaidAdventure implements MiniAdventure {
         if (showInstructions) {
             status += "\n";
             status += "How to play:\n";
-            status += "1. Move with u, d, l, r.\n";
+            status += "1. Move with up, down, left, and right.\n";
             status += "2. Stand on an objective tile.\n";
-            status += "3. Use w to work on that objective.\n";
+            status += "3. Use complete on that objective.\n";
             if (mode == TimedRaidMode.REAL_TIME) {
                 status += "4. Players may act without alternating turns while the timer runs.\n";
                 status += "5. Complete all objectives before time runs out.\n";
@@ -165,8 +170,8 @@ public class TimedRaidAdventure implements MiniAdventure {
 
         status += "\n";
         status += "Commands:\n";
-        status += "u = up   d = down   l = left   r = right   w = work   p = pass\n";
-        status += "Tip: work only helps when you are standing on an objective tile.";
+        status += "up, down, left, right, complete, pass\n";
+        status += "Tip: complete only helps when you are standing on an objective tile.";
 
         return status;
     }
@@ -225,12 +230,12 @@ public class TimedRaidAdventure implements MiniAdventure {
         String s = input.trim().toLowerCase();
 
         return switch (s) {
-            case "move up", "up", "u" -> TimedRaidState.Action.MOVE_UP;
-            case "move down", "down", "d" -> TimedRaidState.Action.MOVE_DOWN;
-            case "move left", "left", "l" -> TimedRaidState.Action.MOVE_LEFT;
-            case "move right", "right", "r" -> TimedRaidState.Action.MOVE_RIGHT;
-            case "work", "w" -> TimedRaidState.Action.WORK;
-            case "pass", "p" -> TimedRaidState.Action.PASS;
+            case "move up", "up" -> TimedRaidState.Action.MOVE_UP;
+            case "move down", "down" -> TimedRaidState.Action.MOVE_DOWN;
+            case "move left", "left" -> TimedRaidState.Action.MOVE_LEFT;
+            case "move right", "right" -> TimedRaidState.Action.MOVE_RIGHT;
+            case "complete" -> TimedRaidState.Action.WORK;
+            case "pass" -> TimedRaidState.Action.PASS;
             default -> null;
         };
     }
@@ -297,9 +302,9 @@ public class TimedRaidAdventure implements MiniAdventure {
                     : playerName + " moved right.";
             case WORK -> {
                 if (Arrays.equals(beforeProgress, afterProgress)) {
-                    yield playerName + " used work on an empty tile.";
+                    yield playerName + " used complete on an empty tile.";
                 }
-                yield playerName + " worked on " + changedObjective(beforeProgress, afterProgress) + ".";
+                yield playerName + " completed " + changedObjective(beforeProgress, afterProgress) + ".";
             }
             case PASS -> playerName + " passed.";
         };
@@ -325,9 +330,9 @@ public class TimedRaidAdventure implements MiniAdventure {
 
     private String currentTileText(TimedRaidState.PlayerId player) {
         int idx = state.getObjectiveIndexAtPlayer(player);
-        if (idx == 0) return "Get Artifact tile (use w)";
-        if (idx == 1) return "Activate Gate tile (use w)";
-        if (idx == 2) return "Clear Enemies tile (use w)";
+        if (idx == 0) return "Get Artifact tile (use complete)";
+        if (idx == 1) return "Activate Gate tile (use complete)";
+        if (idx == 2) return "Clear Enemies tile (use complete)";
 
         int x = state.getPlayerX(player);
         int y = state.getPlayerY(player);

@@ -30,13 +30,13 @@ public class TimedRaidTest {
         printStep("P2 move down", state, clock);
 
         state.applyAction(TimedRaidState.PlayerId.P1, TimedRaidState.Action.WORK);
-        printStep("P1 work", state, clock);
+        printStep("P1 complete", state, clock);
 
         state.applyAction(TimedRaidState.PlayerId.P2, TimedRaidState.Action.MOVE_RIGHT);
         printStep("P2 move right", state, clock);
 
         state.applyAction(TimedRaidState.PlayerId.P1, TimedRaidState.Action.WORK);
-        printStep("P1 work", state, clock);
+        printStep("P1 complete", state, clock);
 
         state.applyAction(TimedRaidState.PlayerId.P2, TimedRaidState.Action.PASS);
         printStep("P2 pass", state, clock);
