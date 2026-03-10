@@ -4,10 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Reused from A3 
- * Added countByRarity() helper used by Relic Hunt win-condition logic.
+ * Reused from A3 Added countByRarity() helper used by Relic Hunt win-condition
+ * logic.
  */
 public class Inventory {
+
     private final List<Item> items;
 
     public Inventory() {
@@ -22,7 +23,9 @@ public class Inventory {
         items.remove(item);
     }
 
-    /** Returns a defensive copy so callers cannot mutate internal state. */
+    /**
+     * Returns a defensive copy so callers cannot mutate internal state.
+     */
     public List<Item> getItems() {
         return new ArrayList<>(items);
     }
@@ -32,13 +35,15 @@ public class Inventory {
     }
 
     /**
-     * Added for Relic Hunt: count how many relics of a given rarity the player holds.
-     * e.g. countByRarity("legendary")
+     * Added for Relic Hunt: count how many relics of a given rarity the player
+     * holds. e.g. countByRarity("legendary")
      */
     public int countByRarity(String rarity) {
         int count = 0;
         for (Item item : items) {
-            if (item.getRarity().equalsIgnoreCase(rarity)) count++;
+            if (item.getRarity().equalsIgnoreCase(rarity)) {
+                count++;
+            }
         }
         return count;
     }

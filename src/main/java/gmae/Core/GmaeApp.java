@@ -16,8 +16,9 @@ public class GmaeApp {
         registry.register(new RelicHuntAdventure(4, 20, 3, RelicHuntState.Mode.COMPETITIVE));
         // registry.register(new RelicHuntAdventure(...));  // TODO: add when ready
 
+        ProfileManager profileManager = new ProfileManager();
         GameEngine engine = new GameEngine(scanner);
-        MenuSystem menu = new MenuSystem(scanner, registry, engine);
+        MenuSystem menu = new MenuSystem(scanner, registry, engine, profileManager);
         menu.show();
     }
 }
