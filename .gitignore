@@ -1,2 +1,10 @@
 out/
 *.class
+
+# build outputs
+*.class
+out/
+
+# build outputs
+*.class
+out/
