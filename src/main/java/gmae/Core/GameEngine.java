@@ -18,7 +18,11 @@ public class GameEngine {
             String status = adventure.getStatus();
             System.out.println(status);
 
-            int playerIndex = status.contains("P2") ? 2 : 1;
+            int playerIndex = 1;
+            if (status.contains("Turn: Player 2") || status.contains("Current Turn: P2")) {
+                playerIndex = 2;
+            }
+
             System.out.println("\nPlayer " + playerIndex + " input:");
             System.out.print("> ");
             String input = scanner.nextLine();
