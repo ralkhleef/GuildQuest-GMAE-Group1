@@ -10,7 +10,8 @@ public class GameEngine {
         this.scanner = scanner;
     }
 
-    public void run(MiniAdventure adventure) {
+    public void run(MiniAdventure adventure, PlayerProfile p1, PlayerProfile p2) {
+        adventure.setPlayers(p1, p2);
         adventure.start();
 
         while (!adventure.isOver()) {
@@ -30,6 +31,11 @@ public class GameEngine {
             adventure.handleInput(playerIndex, input);
         }
 
-        System.out.println("\n" + adventure.getResult());
+        String result = adventure.getResult();
+        System.out.println("\n" + result);
+
+        String historyEntry = adventure.name() + " — " + result.split("\n")[0];
+        p1.addQuestHistory(historyEntry);
+        p2.addQuestHistory(historyEntry);
     }
 }
