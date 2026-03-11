@@ -17,4 +17,6 @@ public interface MiniAdventure {
     String getResult();
 
     void reset();
+
+    default void setPlayers(PlayerProfile p1, PlayerProfile p2) { }
 }

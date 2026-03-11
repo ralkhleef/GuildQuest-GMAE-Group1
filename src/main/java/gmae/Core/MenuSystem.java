@@ -54,7 +54,7 @@ public class MenuSystem {
 
             MiniAdventure selected = parseChoice(choice, adventures);
             if (selected != null) {
-                engine.run(selected);
+                engine.run(selected, player1, player2);
             } else {
                 System.out.println("Invalid choice.");
             }
