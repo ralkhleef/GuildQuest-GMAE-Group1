@@ -17,6 +17,9 @@ public class GmaeApp {
         // registry.register(new RelicHuntAdventure(...));  // TODO: add when ready
 
         ProfileManager profileManager = new ProfileManager();
+        profileManager.createProfile("John Doe", "ELH 1200");
+        profileManager.createProfile("Ghadeer", "None");
+        profileManager.createProfile("Kun", "HIB 100");
         GameEngine engine = new GameEngine(scanner);
         MenuSystem menu = new MenuSystem(scanner, registry, engine, profileManager);
         menu.show();
