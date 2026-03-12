@@ -1,5 +1,7 @@
 package gmae.core;
 
+import gmae.adventures.timedraid.TimedRaidAdventure;
+import gmae.adventures.timedraid.TimedRaidMode;
 import java.util.List;
 import java.util.Scanner;
 
@@ -54,6 +56,19 @@ public class MenuSystem {
 
             MiniAdventure selected = parseChoice(choice, adventures);
             if (selected != null) {
+                if (selected.id().equals("timed_raid")) {
+                    System.out.println("\nChoose Timed Raid mode:");
+                    System.out.println("1) Turn-based");
+                    System.out.println("2) Real-time");
+                    System.out.print("> ");
+                    String modeChoice = scanner.nextLine().trim();
+
+                    if (modeChoice.equals("2")) {
+                        selected = new TimedRaidAdventure(5, 10, new int[]{2, 2, 2}, TimedRaidMode.REAL_TIME);
+                    } else {
+                        selected = new TimedRaidAdventure(5, 10, new int[]{2, 2, 2}, TimedRaidMode.TURN_BASED);
+                    }
+                }
                 engine.run(selected, player1, player2);
             } else {
                 System.out.println("Invalid choice.");
