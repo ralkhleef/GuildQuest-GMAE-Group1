@@ -12,6 +12,10 @@ public class RealmManager {
     }
 
     public Realm createRealm(String id, String inpName) {
+        if (getByName(inpName) != null) {
+            System.out.println("Error! Realm with name '" + inpName + "' already exists.");
+            return null;
+        }
         Realm newRealm = new Realm(id, inpName);
         realms.add(newRealm);
         return newRealm;

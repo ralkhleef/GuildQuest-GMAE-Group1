@@ -235,6 +235,10 @@ public class MenuSystem {
         }
 
         Realm realms = realmManager.createRealm(id, inpName);
+        if (realms == null) {
+            System.out.println("Try a different name.");
+            return createNewRealm();
+        }
         return realms;
 
     }
