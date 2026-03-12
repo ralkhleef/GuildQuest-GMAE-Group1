@@ -104,6 +104,9 @@ public class MenuSystem {
                 selectedProfile = createNewProfile();
             } else if (choice.equals("2") && profileManager.size() > 0) {
                 selectedProfile = selectExistingProfile();
+                if (selectedProfile == null) {
+                    continue;
+                }
             } else {
                 if (choice.equals("2") && profileManager.size() <= 0) {
                     System.out.println("\nInvalid! Zero existing profiles");
@@ -137,6 +140,10 @@ public class MenuSystem {
         Realm realmChoice = selectingExistingRealms();
 
         PlayerProfile profile = profileManager.createProfile(name, realmChoice);
+        if (profile == null) {
+            System.out.println("Invalid! Use a different name");
+            return createNewProfile();
+        }
         System.out.println("Created: " + profile);
         return profile;
     }

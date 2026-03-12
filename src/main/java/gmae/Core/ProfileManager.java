@@ -14,6 +14,10 @@ public class ProfileManager {
 
     // Create new profile
     public PlayerProfile createProfile(String charName, Realm realmPreference) {
+        if (getByName(charName) != null) {
+            System.out.println("Error! Profile '" + charName + "' already exists");
+            return null;
+        }
         PlayerProfile profile = new PlayerProfile(charName, realmPreference);
         profiles.add(profile);
         return profile;
