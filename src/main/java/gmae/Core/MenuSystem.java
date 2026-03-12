@@ -2,6 +2,8 @@ package gmae.core;
 
 import java.util.List;
 import java.util.Scanner;
+import guildquest.model.*;
+import java.nio.file.ReadOnlyFileSystemException;
 
 public class MenuSystem {
 
@@ -9,15 +11,17 @@ public class MenuSystem {
     private final AdventureRegistry registry;
     private final GameEngine engine;
     private final ProfileManager profileManager;
+    private final RealmManager realmManager;
 
     private PlayerProfile player1;
     private PlayerProfile player2;
 
-    public MenuSystem(Scanner scanner, AdventureRegistry registry, GameEngine engine, ProfileManager profileManager) {
+    public MenuSystem(Scanner scanner, AdventureRegistry registry, GameEngine engine, ProfileManager profileManager, RealmManager realmManager) {
         this.scanner = scanner;
         this.registry = registry;
         this.engine = engine;
         this.profileManager = profileManager;
+        this.realmManager = realmManager;
     }
 
     public void show() {
@@ -37,6 +41,11 @@ public class MenuSystem {
             for (int i = 0; i < adventures.size(); i++) {
                 System.out.println((i + 1) + ") " + adventures.get(i).name());
             }
+            int counter = 0;
+            counter = adventures.size();
+            System.out.println((adventures.size() + 1) + ") Create New Realm");
+            System.out.println((adventures.size() + 2) + ") Create New Profile");
+
             System.out.println("0) Quit");
 
             System.out.print("> ");
@@ -45,9 +54,14 @@ public class MenuSystem {
             if (choice.equals("0") || choice.equalsIgnoreCase("quit")) {
                 System.out.println("Goodbye!");
                 break;
-            }
+            } else if (choice.equals(String.valueOf(counter + 1))) {
+                createNewRealm();
+                continue;
+            } else if (choice.equals(String.valueOf(counter + 2))) {
+                createNewProfile();
+                continue;
 
-            if (choice.equalsIgnoreCase("S")) {
+            } else if (choice.equalsIgnoreCase("S")) {
                 swapPlayer();
                 continue;
             }
@@ -105,11 +119,7 @@ public class MenuSystem {
             }
         }
 
-        System.out.print("Enter realm preference (or press Enter for none): ");
-        String realmChoice = scanner.nextLine().trim();
-        if (realmChoice.isEmpty()) {
-            realmChoice = "None";
-        }
+        Realm realmChoice = selectingExistingRealms();
 
         PlayerProfile profile = profileManager.createProfile(name, realmChoice);
         System.out.println("Created: " + profile);
@@ -118,27 +128,100 @@ public class MenuSystem {
 
     // Select player
     private PlayerProfile selectExistingProfile() {
-        List<PlayerProfile> profiles = profileManager.getProfiles();
-        System.out.println("\nSelect from existing profiles below: ");
-        for (int i = 0; i < profiles.size(); i++) {
-            System.out.println((i + 1) + ") " + profiles.get(i));
-        }
-
-        System.out.print("> ");
-        String input = scanner.nextLine().trim();
-
-        try {
-            int index = Integer.parseInt(input) - 1;
-            if (index >= 0 && index < profiles.size()) {
-                System.out.println("Selected: " + profiles.get(index));
-                return profiles.get(index);
+        while (true) {
+            List<PlayerProfile> profiles = profileManager.getProfiles();
+            System.out.println("\nSelect from existing profiles below or 'b' to back: ");
+            for (int i = 0; i < profiles.size(); i++) {
+                System.out.println((i + 1) + ") " + profiles.get(i));
             }
-        } catch (Exception e) {
-            System.out.println("Error!");
+
+            System.out.print("> ");
+            String input = scanner.nextLine().trim();
+            if (input.equalsIgnoreCase("b")) {
+                break;
+            }
+
+            try {
+                int index = Integer.parseInt(input) - 1;
+                if (index >= 0 && index < profiles.size()) {
+                    System.out.println("Selected: " + profiles.get(index));
+                    return profiles.get(index);
+                } else if (index >= profiles.size() || index <= 0) {
+                    System.out.println("Invalid choice!");
+                }
+            } catch (Exception e) {
+                System.out.println("Error!");
+            }
+        }
+        return null;
+    }
+
+    private Realm selectingExistingRealms() {
+        while (true) {
+            List<Realm> realms = realmManager.getRealms();
+            System.out.println("\nSelect from existing realms below!)");
+            System.out.println("Press 'Enter' for none or 'N' to create new Realm: ");
+            for (int i = 0; i < realms.size(); i++) {
+                System.out.println((i + 1) + ") " + realms.get(i).getName());
+            }
+
+            System.out.print("> ");
+            String input = scanner.nextLine().trim();
+            if (input.equals("")) {
+                break;
+            } else if (input.equalsIgnoreCase("N")) {
+                Realm newR = createNewRealm();
+            }
+
+            try {
+                int index = Integer.parseInt(input) - 1;
+                if (index >= 0 && index < realms.size()) {
+                    System.out.println("Selected: " + realms.get(index));
+                    return realms.get(index);
+                } else if (index >= realms.size() || index <= 0) {
+                    System.out.println("Invalid choice!");
+                }
+            } catch (Exception e) {
+                System.out.println("Error!");
+            }
+
+            System.out.println("Invalid Choice!");
+            return selectingExistingRealms();
         }
 
-        System.out.println("Invalid Choice!");
-        return createNewProfile();
+        return null;
+    }
+
+    private Realm createNewRealm() {
+        String id;
+        String inpName;
+        while (true) {
+            System.out.println("\nEnter Id for realm: ");
+            System.out.print("> ");
+            String input = scanner.nextLine().trim();
+            if (input.isEmpty()) {
+                System.err.println("Error, cannot be empty!");
+                continue;
+            }
+            id = input;
+            break;
+        }
+
+        while (true) {
+            System.out.println("\nEnter name for realm: ");
+            System.out.print("> ");
+            String inputName = scanner.nextLine().trim();
+            if (inputName.isEmpty()) {
+                System.err.println("Error, cannot be empty!");
+                continue;
+            }
+            inpName = inputName;
+            break;
+        }
+
+        Realm realms = realmManager.createRealm(id, inpName);
+        return realms;
+
     }
 
     // P1 and P2 switching profiles

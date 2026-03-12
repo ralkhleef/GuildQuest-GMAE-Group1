@@ -6,18 +6,26 @@ import java.util.List;
 
 public class PlayerProfile {
 
+    private Realm currentRealm;
     private String charName;
-    private String realmPreference;
     private final Inventory inventory;
     private final List<String> questHistory;
     private final List<String> achievements;
 
-    public PlayerProfile(String charName, String realmPreference) {
+    public PlayerProfile(String charName, Realm realmPreference) {
         this.charName = charName;
-        this.realmPreference = realmPreference;
+        this.currentRealm = realmPreference;
         this.inventory = new Inventory();
         this.questHistory = new ArrayList<>();
         this.achievements = new ArrayList<>();
+    }
+
+    public Realm getCurrentRealm() {
+        return currentRealm;
+    }
+
+    public void setCurrentRealm(Realm r) {
+        this.currentRealm = r;
     }
 
     // get characters name
@@ -33,17 +41,6 @@ public class PlayerProfile {
     // changing characters name
     public void changeName(String newName) {
         this.charName = newName;
-    }
-
-    // get Realm Preference
-    public String getRealmPreference() {
-        return realmPreference;
-    }
-
-    // setting Realm Preference 
-    // handle checking for input?
-    public void setRealmPreference(String newRealmPreference) {
-        this.realmPreference = newRealmPreference;
     }
 
     // get copy of inventory
@@ -100,6 +97,6 @@ public class PlayerProfile {
 
     @Override
     public String toString() {
-        return charName + " (Realm: " + realmPreference + ")";
+        return charName + " (Realm: " + currentRealm + ")";
     }
 }

@@ -13,7 +13,7 @@ public class ProfileManager {
     }
 
     // Create new profile
-    public PlayerProfile createProfile(String charName, String realmPreference) {
+    public PlayerProfile createProfile(String charName, Realm realmPreference) {
         PlayerProfile profile = new PlayerProfile(charName, realmPreference);
         profiles.add(profile);
         return profile;
