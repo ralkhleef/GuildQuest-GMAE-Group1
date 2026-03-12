@@ -48,6 +48,10 @@ public class PlayerProfile {
         return inventory.getItems();
     }
 
+    public int getInventorySize() {
+        return inventory.size();
+    }
+
     // snapshot of inventory
     public void printSnapshot() {
         inventory.displayInventory();

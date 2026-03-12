@@ -44,9 +44,12 @@ public class MenuSystem {
                 System.out.println((i + 1) + ") " + adventures.get(i).name());
             }
             int counter = 0;
+
+            // Menu Options (This is after the Mini Game menu)
             counter = adventures.size();
             System.out.println((adventures.size() + 1) + ") Create New Realm");
             System.out.println((adventures.size() + 2) + ") Create New Profile");
+            System.out.println((adventures.size() + 3) + ") View Inventory");
 
             System.out.println("0) Quit");
 
@@ -63,6 +66,9 @@ public class MenuSystem {
                 createNewProfile();
                 continue;
 
+            } else if (choice.equals(String.valueOf(counter + 3))) {
+                displayInventory();
+                continue;
             } else if (choice.equalsIgnoreCase("S")) {
                 swapPlayer();
                 continue;
@@ -88,6 +94,14 @@ public class MenuSystem {
                 System.out.println("Invalid choice.");
             }
         }
+    }
+
+    private void displayInventory() {
+        System.out.println("\n=== Player Inventories ===");
+        System.out.println(player1.getCharName() + "'s Inventory:");
+        player1.printSnapshot();
+        System.out.println("\n" + player2.getCharName() + "'s Inventory:");
+        player2.printSnapshot();
     }
 
     // P1 and P2 setup

@@ -25,9 +25,14 @@ public class GmaeApp {
 
         ProfileManager profileManager = new ProfileManager();
 
-        profileManager.createProfile("John Doe", r1);
-        profileManager.createProfile("Ghadeer", r2);
-        profileManager.createProfile("Kun", null);
+        PlayerProfile john = profileManager.createProfile("John Doe", r1);
+        PlayerProfile ghadeer = profileManager.createProfile("Ghadeer", r2);
+        PlayerProfile kun = profileManager.createProfile("Kun", null);
+
+        john.addItem(new Item("Sword", "Weapon", "rare", "Sturdy blade"));
+        john.addItem(new Item("Meat", "Consumable", "common", "Food"));
+        ghadeer.addItem(new Item("Compass", "Map", "common", "Navigation"));
+
         GameEngine engine = new GameEngine(scanner);
         MenuSystem menu = new MenuSystem(scanner, registry, engine, profileManager, realmManager);
         menu.show();
