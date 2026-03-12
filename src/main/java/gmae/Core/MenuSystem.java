@@ -158,7 +158,7 @@ public class MenuSystem {
     private PlayerProfile selectExistingProfile() {
         while (true) {
             List<PlayerProfile> profiles = profileManager.getProfiles();
-            System.out.println("\nSelect from existing profiles below or 'b' to back: ");
+            System.out.println("\nSelect from existing profiles below or ('b' to back): ");
             for (int i = 0; i < profiles.size(); i++) {
                 System.out.println((i + 1) + ") " + profiles.get(i));
             }
