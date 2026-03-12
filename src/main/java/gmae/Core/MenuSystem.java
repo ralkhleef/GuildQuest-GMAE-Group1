@@ -48,8 +48,10 @@ public class MenuSystem {
             // Menu Options (This is after the Mini Game menu)
             counter = adventures.size();
             System.out.println((adventures.size() + 1) + ") Create New Realm");
-            System.out.println((adventures.size() + 2) + ") Create New Profile");
-            System.out.println((adventures.size() + 3) + ") View Inventory");
+            System.out.println((adventures.size() + 2) + ") Change Realms");
+            System.out.println((adventures.size() + 3) + ") Create New Profile");
+            System.out.println((adventures.size() + 4) + ") View Inventory");
+            System.out.println((adventures.size() + 5) + ") View Achievements");
 
             System.out.println("0) Quit");
 
@@ -63,11 +65,17 @@ public class MenuSystem {
                 createNewRealm();
                 continue;
             } else if (choice.equals(String.valueOf(counter + 2))) {
+                changeRealm();
+                continue;
+            } else if (choice.equals(String.valueOf(counter + 3))) {
                 createNewProfile();
                 continue;
 
-            } else if (choice.equals(String.valueOf(counter + 3))) {
+            } else if (choice.equals(String.valueOf(counter + 4))) {
                 displayInventory();
+                continue;
+            } else if (choice.equals(String.valueOf(counter + 5))) {
+                displayAchievements();
                 continue;
             } else if (choice.equalsIgnoreCase("S")) {
                 swapPlayer();
@@ -102,6 +110,37 @@ public class MenuSystem {
         player1.printSnapshot();
         System.out.println("\n" + player2.getCharName() + "'s Inventory:");
         player2.printSnapshot();
+    }
+
+    private void displayAchievements() {
+        System.out.println("\n=== Player Achievements ===");
+        System.out.println(player1.getCharName() + "'s Achievements:");
+        player1.printAchievements();
+        System.out.println("\n" + player2.getCharName() + "'s Achievements:");
+        player2.printAchievements();
+    }
+
+    private void changeRealm() {
+        System.out.println("\nSelect player?");
+        System.out.println("1) " + player1.getCharName());
+        System.out.println("2) " + player2.getCharName());
+        System.out.print("> ");
+        String input = scanner.nextLine().trim();
+
+        PlayerProfile selectedPlayer;
+        if (input.equals("1")) {
+            selectedPlayer = player1;
+        } else if (input.equals("2")) {
+            selectedPlayer = player2;
+        } else {
+            System.out.println("Invalid choice.");
+            return;
+        }
+
+        System.out.println("Current realm: " + selectedPlayer.getCurrentRealm());
+        Realm newRealm = selectingExistingRealms();
+        selectedPlayer.setCurrentRealm(newRealm);
+        System.out.println(selectedPlayer.getCharName() + " realm updated to: " + selectedPlayer.getCurrentRealm());
     }
 
     // P1 and P2 setup

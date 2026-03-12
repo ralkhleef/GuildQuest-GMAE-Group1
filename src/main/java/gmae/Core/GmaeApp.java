@@ -29,9 +29,16 @@ public class GmaeApp {
         PlayerProfile ghadeer = profileManager.createProfile("Ghadeer", r2);
         PlayerProfile kun = profileManager.createProfile("Kun", null);
 
-        john.addItem(new Item("Sword", "Weapon", "rare", "Sturdy blade"));
-        john.addItem(new Item("Meat", "Consumable", "common", "Food"));
-        ghadeer.addItem(new Item("Compass", "Map", "common", "Navigation"));
+        john.addItem(new Item("Sword", "Weapon", "Rare", "Sturdy blade"));
+        john.addItem(new Item("Meat", "Consumable", "Common", "Used to satisfy hunger"));
+        ghadeer.addItem(new Item("Compass", "Map", "Common", "Navigator"));
+        ghadeer.addItem(new Item("Water", "Consumable", "Common", "Used to satisfy thirst"));
+
+        john.addAchievement("Battle Royale Champion");
+        john.addAchievement("Relic Master");
+
+        ghadeer.addAchievement("Most Raids Completed");
+        ghadeer.addAchievement("Legendary Hunter");
 
         GameEngine engine = new GameEngine(scanner);
         MenuSystem menu = new MenuSystem(scanner, registry, engine, profileManager, realmManager);
