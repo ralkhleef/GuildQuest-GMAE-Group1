@@ -102,6 +102,9 @@ public class MenuSystem {
             String choice = scanner.nextLine().trim();
             if (choice.equals("1")) {
                 selectedProfile = createNewProfile();
+                if (selectedProfile == null) {
+                    continue;
+                }
             } else if (choice.equals("2") && profileManager.size() > 0) {
                 selectedProfile = selectExistingProfile();
                 if (selectedProfile == null) {
@@ -130,8 +133,11 @@ public class MenuSystem {
     private PlayerProfile createNewProfile() {
         String name = "";
         while (name.isEmpty()) {
-            System.out.print("Enter character name: ");
+            System.out.print("Enter character name or ('b' to back): ");
             name = scanner.nextLine().trim();
+            if (name.equalsIgnoreCase("b")) {
+                return null;
+            }
             if (name.isEmpty()) {
                 System.out.println("Error!: Name cannot be empty.");
             }
