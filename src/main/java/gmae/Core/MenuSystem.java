@@ -58,6 +58,7 @@ public class MenuSystem {
             System.out.print("> ");
             String choice = scanner.nextLine().trim();
 
+            // This is the menu options, it starts from the last adventure game + 1 after that is the first option
             if (choice.equals("0") || choice.equalsIgnoreCase("quit")) {
                 System.out.println("Goodbye!");
                 break;
