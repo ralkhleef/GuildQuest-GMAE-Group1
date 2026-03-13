@@ -41,6 +41,9 @@ public class RelicHuntState {
     // Hazard tile locations
     private final Set<Location> hazardTiles = new HashSet<>();
 
+    // Fog of war: tiles players have visited
+    private final Set<Location> discoveredTiles = new HashSet<>();
+
     // Turn tracking
     private int currentPlayer = 1; // 1 or 2
     private int turnsRemaining;
@@ -62,6 +65,9 @@ public class RelicHuntState {
 
         spawnRelics();
         spawnHazards();
+
+        discoveredTiles.add(p1Pos);
+        discoveredTiles.add(p2Pos);
     }
 
     // Setup
@@ -185,6 +191,8 @@ public class RelicHuntState {
         if (player == 1) p1Pos = next;
         else             p2Pos = next;
 
+        discoveredTiles.add(next);
+
         StringBuilder msg = new StringBuilder("P" + player + " moved to " + next);
 
         // Hazard tile check
@@ -268,11 +276,13 @@ public class RelicHuntState {
                 boolean isP2 = p2Pos.x() == x && p2Pos.y() == y;
 
                 if (isP1 && isP2) {
-                    sb.append("X ");  // both players on same tile
+                    sb.append("X ");
                 } else if (isP1) {
                     sb.append("1 ");
                 } else if (isP2) {
                     sb.append("2 ");
+                } else if (!discoveredTiles.contains(loc)) {
+                    sb.append("? ");
                 } else if (relicsOnGrid.containsKey(loc)) {
                     sb.append("R ");
                 } else if (hazardTiles.contains(loc)) {
@@ -283,7 +293,7 @@ public class RelicHuntState {
             }
             sb.append("\n");
         }
-        sb.append("1=P1  2=P2  R=Relic  H=Hazard  X=Both Players");
+        sb.append("1=P1  2=P2  R=Relic  H=Hazard ?=Unexplored X=Both Players");
         return sb.toString();
     }
 
@@ -300,7 +310,6 @@ public class RelicHuntState {
         sb.append("P1 @ ").append(p1Pos).append(" | Relics: ").append(p1Inventory.size()).append("\n");
         sb.append("P2 @ ").append(p2Pos).append(" | Relics: ").append(p2Inventory.size()).append("\n");
         sb.append("Relics on grid: ").append(relicsOnGrid.size()).append("\n");
-        sb.append("Hazard tiles: ").append(hazardTiles).append("\n");
         sb.append("\n").append(buildMapString()).append("\n");
         sb.append("\nCommands: up, down, left, right, collect, pass");
         return sb.toString();
