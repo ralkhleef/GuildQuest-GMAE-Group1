@@ -140,6 +140,8 @@ public class TimedRaidAdventure implements MiniAdventure {
         }
         status += "Last Action: " + lastActionMessage + "\n";
         status += "\n";
+        status += state.buildMapString() + "\n";
+        status += "\n";
         status += "Objectives:\n";
         status += "Get Artifact " + progress[0] + "/" + needed[0]
                 + "   Activate Gate " + progress[1] + "/" + needed[1]

@@ -209,6 +209,53 @@ public class TimedRaidState {
         }
     }
 
+    public String buildMapString() {
+        int[] prog = getProgressCopy();
+        int[] req = getRequiredCopy();
+        StringBuilder sb = new StringBuilder();
+        // column headers
+        sb.append("  ");
+        for (int x = 0; x <= 4; x++) {
+            sb.append(x).append(" ");
+        }
+        sb.append("\n");
+
+        for (int y = 0; y <= 4; y++) {
+            sb.append(y).append(" ");
+            for (int x = 0; x <= 4; x++) {
+                boolean isP1 = p1x == x && p1y == y;
+                boolean isP2 = p2x == x && p2y == y;
+                int objIdx = objectiveIndexAt(x, y);
+
+                if (isP1 && isP2) {
+                    sb.append("X ");
+                } else if (isP1) {
+                    sb.append("1 ");
+                } else if (isP2) {
+                    sb.append("2 ");
+                } else if (objIdx >= 0) {
+                    if (prog[objIdx] >= req[objIdx]) {
+                        sb.append("* ");  // completed objective
+                    } else {
+                        sb.append("O ");  // incomplete objective
+                    }
+                } else {
+                    sb.append("_ ");
+                }
+            }
+            sb.append("\n");
+        }
+        sb.append("1=P1  2=P2  O=Objective  *=Done  X=Both Players");
+        return sb.toString();
+    }
+
+    private int objectiveIndexAt(int x, int y) {
+        if (x == 1 && y == 1) return 0;
+        if (x == 3 && y == 2) return 1;
+        if (x == 4 && y == 4) return 2;
+        return -1;
+    }
+
     private boolean allObjectivesComplete() {
         for (int i = 0; i < 3; i++) {
             if (progress[i] < required[i]) return false;

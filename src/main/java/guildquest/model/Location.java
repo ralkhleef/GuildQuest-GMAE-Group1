@@ -23,6 +23,13 @@ public final class Location {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Location loc)) return false;
+        return x == loc.x && y == loc.y;
+    }
+
+    @Override
     public int hashCode() {
         return Objects.hash(x, y);
     }

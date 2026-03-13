@@ -188,6 +188,7 @@ public class RelicHuntState {
         StringBuilder msg = new StringBuilder("P" + player + " moved to " + next);
 
         // Hazard tile check
+        boolean stunned = false;
         if (hazardTiles.contains(next)) {
             Item atLocation = relicsOnGrid.get(next);
             int stun = (atLocation != null)
@@ -196,6 +197,15 @@ public class RelicHuntState {
             if (player == 1) p1StunTurns += stun;
             else             p2StunTurns += stun;
             msg.append(" — HAZARD! Stunned for ").append(stun).append(" turn(s).");
+            stunned = true;
+        }
+
+        // Auto-collect relic if not stunned
+        if (!stunned && relicsOnGrid.containsKey(next)) {
+            Item relic = relicsOnGrid.remove(next);
+            Inventory inv = (player == 1) ? p1Inventory : p2Inventory;
+            inv.addItem(relic);
+            msg.append(" — Found ").append(relic.describe()).append("!");
         }
 
         return msg.toString();
@@ -241,6 +251,42 @@ public class RelicHuntState {
         }
     }
 
+    public String buildMapString() {
+        StringBuilder sb = new StringBuilder();
+        // column headers
+        sb.append("  ");
+        for (int x = 0; x < gridSize; x++) {
+            sb.append(x).append(" ");
+        }
+        sb.append("\n");
+
+        for (int y = 0; y < gridSize; y++) {
+            sb.append(y).append(" ");
+            for (int x = 0; x < gridSize; x++) {
+                Location loc = new Location(x, y);
+                boolean isP1 = p1Pos.x() == x && p1Pos.y() == y;
+                boolean isP2 = p2Pos.x() == x && p2Pos.y() == y;
+
+                if (isP1 && isP2) {
+                    sb.append("X ");  // both players on same tile
+                } else if (isP1) {
+                    sb.append("1 ");
+                } else if (isP2) {
+                    sb.append("2 ");
+                } else if (relicsOnGrid.containsKey(loc)) {
+                    sb.append("R ");
+                } else if (hazardTiles.contains(loc)) {
+                    sb.append("H ");
+                } else {
+                    sb.append("_ ");
+                }
+            }
+            sb.append("\n");
+        }
+        sb.append("1=P1  2=P2  R=Relic  H=Hazard  X=Both Players");
+        return sb.toString();
+    }
+
     public String buildStatusString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Mode: ").append(mode).append("\n");
@@ -255,7 +301,8 @@ public class RelicHuntState {
         sb.append("P2 @ ").append(p2Pos).append(" | Relics: ").append(p2Inventory.size()).append("\n");
         sb.append("Relics on grid: ").append(relicsOnGrid.size()).append("\n");
         sb.append("Hazard tiles: ").append(hazardTiles).append("\n");
-        sb.append("Commands: up, down, left, right, collect, pass");
+        sb.append("\n").append(buildMapString()).append("\n");
+        sb.append("\nCommands: up, down, left, right, collect, pass");
         return sb.toString();
     }
 }
