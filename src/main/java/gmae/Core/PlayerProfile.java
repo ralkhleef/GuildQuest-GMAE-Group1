@@ -12,6 +12,11 @@ public class PlayerProfile {
     private final List<String> questHistory;
     private final List<String> achievements;
 
+    private int totalWins;
+    private int totalRelicsCollected;
+    private int totalRaidsCompleted;
+    private int totalGamesPlayed;
+
     public PlayerProfile(String charName, Realm realmPreference) {
         this.charName = charName;
         this.currentRealm = realmPreference;
@@ -97,6 +102,57 @@ public class PlayerProfile {
 
     public List<String> getAchievements() {
         return List.copyOf(achievements);
+    }
+
+    public int getTotalWins() { return totalWins; }
+    public int getTotalRelicsCollected() { return totalRelicsCollected; }
+    public int getTotalRaidsCompleted() { return totalRaidsCompleted; }
+    public int getTotalGamesPlayed() { return totalGamesPlayed; }
+
+    public void addWin() { totalWins++; }
+    public void addRelicsCollected(int count) { totalRelicsCollected += count; }
+    public void addRaidCompleted() { totalRaidsCompleted++; }
+    public void addGamePlayed() { totalGamesPlayed++; }
+
+    public List<String> checkAndAwardAchievements() {
+        List<String> newlyAwarded = new ArrayList<>();
+
+        String[][] milestones = {
+            {"First Victory", "Win your first game", "wins", "1"},
+            {"GuildQuest Veteran", "Win 5 games", "wins", "5"},
+            {"Legend of the Realm", "Win 10 games", "wins", "10"},
+            {"Relic Finder", "Collect 5 relics total", "relics", "5"},
+            {"Relic Master", "Collect 15 relics total", "relics", "15"},
+            {"Legendary Collector", "Collect 30 relics total", "relics", "30"},
+            {"Raid Rookie", "Complete your first raid", "raids", "1"},
+            {"Raid Veteran", "Complete 5 raids", "raids", "5"},
+            {"Adventurer", "Play 3 games", "games", "3"},
+            {"Seasoned Adventurer", "Play 10 games", "games", "10"},
+        };
+
+        for (String[] m : milestones) {
+            String name = m[0];
+            String desc = m[1];
+            String type = m[2];
+            int threshold = Integer.parseInt(m[3]);
+
+            if (achievements.contains(name)) continue;
+
+            boolean earned = switch (type) {
+                case "wins" -> totalWins >= threshold;
+                case "relics" -> totalRelicsCollected >= threshold;
+                case "raids" -> totalRaidsCompleted >= threshold;
+                case "games" -> totalGamesPlayed >= threshold;
+                default -> false;
+            };
+
+            if (earned) {
+                achievements.add(name);
+                newlyAwarded.add(name + " — " + desc);
+            }
+        }
+
+        return newlyAwarded;
     }
 
     @Override
