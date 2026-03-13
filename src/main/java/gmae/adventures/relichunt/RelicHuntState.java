@@ -41,7 +41,7 @@ public class RelicHuntState {
     // Hazard tile locations
     private final Set<Location> hazardTiles = new HashSet<>();
 
-    // Fog of war: tiles players have visited
+    // Tracks tiles players have visited
     private final Set<Location> discoveredTiles = new HashSet<>();
 
     // Turn tracking
@@ -141,7 +141,7 @@ public class RelicHuntState {
     public Set<Location> getHazardTiles()        { return Collections.unmodifiableSet(hazardTiles); }
 
     /**
-     * Apply a player action. Valid actions: "up", "down", "left", "right", "collect", "pass"
+     * Apply a player action. Valid actions: "up", "down", "left", "right", "pass"
      */
     public String applyAction(int player, String action) {
         if (isOver()) return "Game is already over.";
@@ -167,9 +167,8 @@ public class RelicHuntState {
             case "down"  -> feedback = movePlayer(player,  0,  1);
             case "left"  -> feedback = movePlayer(player, -1,  0);
             case "right" -> feedback = movePlayer(player,  1,  0);
-            case "collect" -> feedback = collectRelic(player);
             case "pass"  -> feedback = "Player " + player + " passed.";
-            default      -> { return "Unknown action: " + cmd + ". Use: up/down/left/right/collect/pass"; }
+            default      -> { return "Unknown action: " + cmd + ". Use: up/down/left/right/pass"; }
         }
 
         advanceTurn();
@@ -217,19 +216,6 @@ public class RelicHuntState {
         }
 
         return msg.toString();
-    }
-
-    private String collectRelic(int player) {
-        Location pos = (player == 1) ? p1Pos : p2Pos;
-        Item relic = relicsOnGrid.get(pos);
-
-        if (relic == null) return "No relic here to collect.";
-
-        relicsOnGrid.remove(pos);
-        Inventory inv = (player == 1) ? p1Inventory : p2Inventory;
-        inv.addItem(relic);
-
-        return "P" + player + " collected: " + relic.describe();
     }
 
     private void advanceTurn() {
@@ -311,7 +297,7 @@ public class RelicHuntState {
         sb.append("P2 @ ").append(p2Pos).append(" | Relics: ").append(p2Inventory.size()).append("\n");
         sb.append("Relics on grid: ").append(relicsOnGrid.size()).append("\n");
         sb.append("\n").append(buildMapString()).append("\n");
-        sb.append("\nCommands: up, down, left, right, collect, pass");
+        sb.append("\nCommands: up, down, left, right, pass");
         return sb.toString();
     }
 }
