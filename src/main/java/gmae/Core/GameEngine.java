@@ -58,13 +58,10 @@ public class GameEngine {
             } else if (resultLine.contains("CO-OP WIN")) {
                 p1.addWin();
                 p2.addWin();
-            } else if (resultLine.contains("TIE")) {
-                p1.addWin();
-                p2.addWin();
-            }
+            } else if (resultLine.contains("TIE")) { }
             // Count relics from inventory size reported in result
-            p1.addRelicsCollected(p1.getInventorySize());
-            p2.addRelicsCollected(p2.getInventorySize());
+            p1.addRelicsCollected(countInventoryItems(result, "P1 Inventory:"));
+            p2.addRelicsCollected(countInventoryItems(result, "P2 Inventory:"));
         } else if (adventure.id().equals("timed_raid")) {
             if (resultLine.contains("WIN")) {
                 p1.addWin();
@@ -87,5 +84,19 @@ public class GameEngine {
                 System.out.println("  >> " + a);
             }
         }
+    }
+    // Counts numbered item lines under player inventory in the result string
+    private int countInventoryItems(String result, String playerInventory) {
+        int start = result.indexOf(playerInventory);
+        if (start < 0) return 0;
+        int count = 0;
+        String[] lines = result.substring(start).split("\n");
+        for (int i = 1; i < lines.length; i++) {
+            String line = lines[i].trim();
+            if (line.isEmpty() || line.contains("Inventory:")) break;
+            if (line.startsWith("[Empty]")) break;
+            count++;
+        }
+        return count;
     }
 }
