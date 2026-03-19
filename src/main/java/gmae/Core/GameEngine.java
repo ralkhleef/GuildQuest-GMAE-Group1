@@ -1,5 +1,7 @@
 package gmae.core;
 
+import gmae.adventures.timedraid.TimedRaidAdventure;
+
 import java.util.List;
 import java.util.Scanner;
 
@@ -12,78 +14,92 @@ public class GameEngine {
     }
 
     public void run(MiniAdventure adventure, PlayerProfile p1, PlayerProfile p2) {
-        try {
-            adventure.setPlayers(p1, p2);
-            adventure.start();
+        adventure.setPlayers(p1, p2);
+        adventure.start();
 
-            while (!adventure.isOver()) {
-                System.out.println("\n--- STATUS ---");
-                String status = adventure.getStatus();
-                System.out.println(status);
+        boolean abandoned = false;
+        int realTimePlayer = 1;
 
-                int playerIndex = 1;
+        TimedRaidAdventure timedRaid = null;
+        boolean isRealTimeRaid = false;
+
+        if (adventure instanceof TimedRaidAdventure raid) {
+            timedRaid = raid;
+            isRealTimeRaid = raid.isRealTimeMode();
+        }
+
+        while (!adventure.isOver()) {
+            System.out.println("\n--- STATUS ---");
+            String status = adventure.getStatus();
+            System.out.println(status);
+
+            int playerIndex;
+
+            if (isRealTimeRaid) {
+                playerIndex = realTimePlayer;
+            } else {
+                playerIndex = 1;
                 if (status.contains("Turn: Player 2") || status.contains("Current Turn: P2")) {
                     playerIndex = 2;
                 }
-
-                System.out.println("\nPlayer " + playerIndex + " input:");
-                System.out.print("> ");
-                String input = scanner.nextLine();
-
-                if (input.trim().equalsIgnoreCase("quit")) {
-                    System.out.println("Adventure abandoned.");
-                    break;
-                }
-
-                adventure.handleInput(playerIndex, input);
             }
 
-            String result = adventure.getResult();
+            System.out.println("\nPlayer " + playerIndex + " input:");
+            System.out.print("> ");
+            String input = scanner.nextLine();
 
-            if (result == null || result.isEmpty()) {
-                result = "No result available";
+            if (input.trim().equalsIgnoreCase("quit")) {
+                System.out.println("Adventure abandoned.");
+                abandoned = true;
+                break;
             }
 
-            System.out.println("\n" + result);
+            adventure.handleInput(playerIndex, input);
 
-            String historyEntry = adventure.name() + " — " + result.split("\n")[0];
-            p1.addQuestHistory(historyEntry);
-            p2.addQuestHistory(historyEntry);
+            if (isRealTimeRaid && timedRaid != null && timedRaid.didConsumeLastInput()) {
+                realTimePlayer = (realTimePlayer == 1) ? 2 : 1;
+            }
+        }
 
-            // Track stats
-            p1.addGamePlayed();
-            p2.addGamePlayed();
+        if (abandoned) {
+            return;
+        }
 
-            String resultLine = result.split("\n")[0].toUpperCase();
+        String result = adventure.getResult();
+        System.out.println("\n" + result);
 
-            if (adventure.id().equals("relic_hunt")) {
-                if (resultLine.contains("PLAYER 1 WINS")) {
-                    p1.addWin();
-                } else if (resultLine.contains("PLAYER 2 WINS")) {
-                    p2.addWin();
-                } else if (resultLine.contains("CO-OP WIN")) {
-                    p1.addWin();
-                    p2.addWin();
-                } else if (resultLine.contains("TIE")) {
-                }
-                // Count relics from inventory size reported in result
-                p1.addRelicsCollected(countInventoryItems(result, "P1 Inventory:"));
-                p2.addRelicsCollected(countInventoryItems(result, "P2 Inventory:"));
-            } else if (adventure.id().equals("timed_raid")) {
-                if (resultLine.contains("WIN")) {
-                    p1.addWin();
-                    p2.addWin();
-                }
+        String historyEntry = adventure.name() + " — " + result.split("\n")[0];
+        p1.addQuestHistory(historyEntry);
+        p2.addQuestHistory(historyEntry);
+
+        p1.addGamePlayed();
+        p2.addGamePlayed();
+
+        String resultLine = result.split("\n")[0].toUpperCase();
+
+        if (adventure.id().equals("relic_hunt")) {
+            if (resultLine.contains("PLAYER 1 WINS")) {
+                p1.addWin();
+            } else if (resultLine.contains("PLAYER 2 WINS")) {
+                p2.addWin();
+            } else if (resultLine.contains("CO-OP WIN")) {
+                p1.addWin();
+                p2.addWin();
+            }
+
+            p1.addRelicsCollected(countInventoryItems(result, "P1 Inventory:"));
+            p2.addRelicsCollected(countInventoryItems(result, "P2 Inventory:"));
+        } else if (adventure.id().equals("timed_raid")) {
+            if (resultLine.contains("WIN")) {
+                p1.addWin();
+                p2.addWin();
                 p1.addRaidCompleted();
                 p2.addRaidCompleted();
             }
-
-            // Check and announce achievements
-            announceAchievements(p1);
-            announceAchievements(p2);
-        } catch (Exception e) {
-            System.out.println("An unexpected error occurred: " + e.getMessage());
         }
+
+        announceAchievements(p1);
+        announceAchievements(p2);
     }
 
     private void announceAchievements(PlayerProfile player) {
@@ -95,10 +111,11 @@ public class GameEngine {
             }
         }
     }
-    // Counts numbered item lines under player inventory in the result string
+
     private int countInventoryItems(String result, String playerInventory) {
         int start = result.indexOf(playerInventory);
         if (start < 0) return 0;
+
         int count = 0;
         String[] lines = result.substring(start).split("\n");
         for (int i = 1; i < lines.length; i++) {

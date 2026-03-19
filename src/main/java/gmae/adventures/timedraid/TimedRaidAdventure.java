@@ -21,6 +21,7 @@ public class TimedRaidAdventure implements MiniAdventure {
 
     private long realTimeLimitMs;
     private long realTimeStartMs;
+    private boolean lastInputConsumed;
 
     public TimedRaidAdventure(int maxRounds, int roundMinutes, int[] required) {
         this(maxRounds, roundMinutes, required, TimedRaidMode.TURN_BASED);
@@ -58,14 +59,18 @@ public class TimedRaidAdventure implements MiniAdventure {
         reset();
 
         if (mode == TimedRaidMode.REAL_TIME) {
-            this.realTimeLimitMs = 60_000;
+            this.realTimeLimitMs = 60_000L;
             this.realTimeStartMs = System.currentTimeMillis();
             this.endReason = "";
         }
+
+        this.lastInputConsumed = false;
     }
 
     @Override
     public void handleInput(int playerIndex, String input) {
+        lastInputConsumed = false;
+
         if (state == null) start();
         if (state.isOver()) return;
 
@@ -94,6 +99,7 @@ public class TimedRaidAdventure implements MiniAdventure {
             int[] afterProgress = state.getProgressCopy();
             lastActionMessage = buildActionMessage(player, action, beforeX, beforeY, afterX, afterY, beforeProgress, afterProgress);
             showInstructions = false;
+            lastInputConsumed = true;
             updateRealTimeStatus();
             return;
         }
@@ -104,6 +110,7 @@ public class TimedRaidAdventure implements MiniAdventure {
         int[] afterProgress = state.getProgressCopy();
         lastActionMessage = buildActionMessage(player, action, beforeX, beforeY, afterX, afterY, beforeProgress, afterProgress);
         showInstructions = false;
+        lastInputConsumed = true;
     }
 
     @Override
@@ -122,7 +129,7 @@ public class TimedRaidAdventure implements MiniAdventure {
         if (mode == TimedRaidMode.REAL_TIME) {
             status += "=== Timed Raid Window (REAL-TIME MODE) ===\n";
             status += "Time Remaining: " + getRemainingSeconds() + " sec\n";
-            status += "Players may act without alternating turns.\n";
+            status += "Players act under a shared live timer.\n";
         } else {
             status += "=== Timed Raid Window ===\n";
             status += "Turn: " + formatPlayer(state.getCurrentPlayer()) + "\n";
@@ -132,12 +139,14 @@ public class TimedRaidAdventure implements MiniAdventure {
         status += "\n";
         status += "Player 1: (" + state.getPlayerX(TimedRaidState.PlayerId.P1) + "," + state.getPlayerY(TimedRaidState.PlayerId.P1) + ")";
         status += "   Player 2: (" + state.getPlayerX(TimedRaidState.PlayerId.P2) + "," + state.getPlayerY(TimedRaidState.PlayerId.P2) + ")\n";
+
         if (mode == TimedRaidMode.REAL_TIME) {
             status += "Player 1 Tile: " + currentTileText(TimedRaidState.PlayerId.P1) + "\n";
             status += "Player 2 Tile: " + currentTileText(TimedRaidState.PlayerId.P2) + "\n";
         } else {
             status += "Current Player Tile: " + currentTileText(state.getCurrentPlayer()) + "\n";
         }
+
         status += "Last Action: " + lastActionMessage + "\n";
         status += "\n";
         status += state.buildMapString() + "\n";
@@ -154,7 +163,7 @@ public class TimedRaidAdventure implements MiniAdventure {
             status += "2. Stand on an objective tile.\n";
             status += "3. Use complete on that objective.\n";
             if (mode == TimedRaidMode.REAL_TIME) {
-                status += "4. Players may act without alternating turns while the timer runs.\n";
+                status += "4. Players act under a shared countdown.\n";
                 status += "5. Complete all objectives before time runs out.\n";
             } else {
                 status += "4. Players alternate turns.\n";
@@ -207,7 +216,8 @@ public class TimedRaidAdventure implements MiniAdventure {
             reason = "";
         }
 
-        return "FINAL RESULT: " + state.getResult() + " | Final Time: " + clock.now()
+        return "FINAL RESULT: " + state.getResult()
+                + " | Final Time: " + clock.now()
                 + " | Reason: " + reason
                 + " | Progress: " + formatProgress();
     }
@@ -221,10 +231,19 @@ public class TimedRaidAdventure implements MiniAdventure {
         this.realTimeLimitMs = 0L;
         this.realTimeStartMs = 0L;
         this.endReason = "";
+        this.lastInputConsumed = false;
     }
 
     public TimedRaidState getState() {
         return state;
+    }
+
+    public boolean isRealTimeMode() {
+        return mode == TimedRaidMode.REAL_TIME;
+    }
+
+    public boolean didConsumeLastInput() {
+        return lastInputConsumed;
     }
 
     private TimedRaidState.Action parseAction(String input) {
@@ -244,6 +263,8 @@ public class TimedRaidAdventure implements MiniAdventure {
 
     private void updateRealTimeStatus() {
         if (mode != TimedRaidMode.REAL_TIME || state == null) return;
+
+        if (realTimeLimitMs <= 0L || realTimeStartMs <= 0L) return;
 
         if (state.getResult() == TimedRaidState.Result.WIN) {
             if (endReason.isEmpty()) {
@@ -274,9 +295,10 @@ public class TimedRaidAdventure implements MiniAdventure {
     }
 
     private long getRemainingSeconds() {
+        if (realTimeLimitMs <= 0L || realTimeStartMs <= 0L) return 0L;
         long elapsed = System.currentTimeMillis() - realTimeStartMs;
         long remaining = Math.max(0L, realTimeLimitMs - elapsed);
-        return remaining / 1000L;
+        return (remaining + 999L) / 1000L;
     }
 
     private String buildActionMessage(TimedRaidState.PlayerId player,
