@@ -1,9 +1,9 @@
 package gmae.core;
 
-import gmae.adventures.timedraid.TimedRaidAdventure;
-
 import java.util.List;
 import java.util.Scanner;
+
+import gmae.adventures.timedraid.TimedRaidAdventure;
 
 public class GameEngine {
 
@@ -78,25 +78,24 @@ public class GameEngine {
         String resultLine = result.split("\n")[0].toUpperCase();
 
         if (adventure.id().equals("relic_hunt")) {
-            if (resultLine.contains("PLAYER 1 WINS")) {
-                p1.addWin();
-            } else if (resultLine.contains("PLAYER 2 WINS")) {
-                p2.addWin();
-            } else if (resultLine.contains("CO-OP WIN")) {
-                p1.addWin();
-                p2.addWin();
+                if (resultLine.contains("WINS!") && resultLine.contains(p1.getCharName().toUpperCase())) {
+                    p1.addWin();
+                } else if (resultLine.contains("WINS!") && resultLine.contains(p2.getCharName().toUpperCase())) {
+                    p2.addWin();
+                } else if (resultLine.contains("CO-OP WIN") || resultLine.contains("TIE")) {
+                    p1.addWin();
+                    p2.addWin();
+                }
+                p1.addRelicsCollected(countInventoryItems(result, p1.getCharName() + " Inventory:"));
+                p2.addRelicsCollected(countInventoryItems(result, p2.getCharName() + " Inventory:"));
+            } else if (adventure.id().equals("timed_raid")) {
+                if (resultLine.contains("WIN")) {
+                    p1.addWin();
+                    p2.addWin();
+                    p1.addRaidCompleted();
+                    p2.addRaidCompleted();
+                }
             }
-
-            p1.addRelicsCollected(countInventoryItems(result, "P1 Inventory:"));
-            p2.addRelicsCollected(countInventoryItems(result, "P2 Inventory:"));
-        } else if (adventure.id().equals("timed_raid")) {
-            if (resultLine.contains("WIN")) {
-                p1.addWin();
-                p2.addWin();
-                p1.addRaidCompleted();
-                p2.addRaidCompleted();
-            }
-        }
 
         announceAchievements(p1);
         announceAchievements(p2);
